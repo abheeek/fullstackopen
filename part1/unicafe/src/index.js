@@ -15,18 +15,19 @@ const Display = ({ text, value }) => (
 
 const Statistics = ({ good, neutral, bad }) => {
   let total = good + neutral + bad
-  if (good === 0 && neutral === 0 && bad === 0) {
+  if (total === 0) {
     return (
       <div>
-        <Display text="all" value={total} />
-        <Display text="average" value={0} />
-        <Display text="positive" value={0} />
+        No feedback given
       </div>
     )
   }
   else {
     return (
       <div>
+        <Display text="good" value={good} />
+        <Display text="neutral" value={neutral} />
+        <Display text="bad" value={bad} />
         <Display text="all" value={total} />
         <Display text="average" value={(good - bad) / total} />
         <Display text="positive" value={((good / total) * 100) + " %"} />
@@ -56,9 +57,6 @@ const App = () => {
       <h1>
         statistics
       </h1>
-      <Display text="good" value={good} />
-      <Display text="neutral" value={neutral} />
-      <Display text="bad" value={bad} />
       <Statistics good={good} neutral={neutral} bad={bad} />
     </div>
   )
