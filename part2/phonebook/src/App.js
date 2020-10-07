@@ -1,15 +1,24 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 import Form from './components/Form'
 import Phonebook from './components/Phonebook'
 import Search from './components/Search'
 
 const App = () => {
-  const [ persons, setPersons ] = useState([
-    { name: 'Arto Hellas', number: '33213243' }
-  ]) 
+  const [ persons, setPersons ] = useState([]) 
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
   const [ searchName, setSearchName ] = useState('')
+
+  useEffect(() => {
+    console.log('effect')
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        console.log(response)
+        setPersons(response.data)
+      })
+  }, [])
 
   const handleNameChange = (event) => {
     setNewName(event.target.value)
