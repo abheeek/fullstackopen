@@ -1,27 +1,20 @@
 import React from 'react'
+import CountryDetails from './CountryDetails'
+import CountryList from './CountryList'
 
-const Display = (props) => {
+const Display = (props) => { 
 
   let numberOfCountries = props.countries.length
 
-  if (numberOfCountries > 10) {
+  if (numberOfCountries === 1){
+    return (
+      <CountryDetails country={props.countries[0]} />
+    )
+  }
+  else if (numberOfCountries > 10) {
     return (
       <div>
         Too many matches, specify another filter
-      </div>
-    )
-  }
-  else if (numberOfCountries === 1){
-    return (
-      <div>
-        <h2>{props.countries[0].name}</h2>
-        capital: {props.countries[0].capital}<br/>
-        population: {props.countries[0].population}
-        <h3>languages</h3>
-        <ul>
-          {props.countries[0].languages.map(language => <li key={language.name}>{language.name}</li>)}
-        </ul>
-        <img src={props.countries[0].flag} alt="country flag" width="100" height="100" />
       </div>
     )
   }
@@ -29,7 +22,11 @@ const Display = (props) => {
     return (
       <div>
         <ul>
-          {props.countries.map(country => <li key={country.numericCode}>{country.name}</li>)}
+          {props.countries.map(country => 
+                                <CountryList 
+                                  key={country.numericCode} 
+                                  country={country} 
+                                  handleShowCountry={props.handleShowCountry} />)}
         </ul>
       </div>
     )

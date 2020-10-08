@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import Searchfield from './components/Searchfield';
-import Display from './components/Display';
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
+import Searchfield from './components/Searchfield'
+import Display from './components/Display'
 
 const App = () => {
   const [countries, setCountries] = useState([])
   const [searchCountry, setSearchCountry] = useState('')
+  const [showCountry, setShowCountry] = useState('')
 
   useEffect(() => {
     axios
@@ -17,17 +18,27 @@ const App = () => {
 
   const handleSearchChange = (event) => {
     setSearchCountry(event.target.value)
+    setShowCountry('')
   }
 
-  const filteredCountries = (event) => {
-    return countries.filter((country) => country.name.toLowerCase()
+  const handleShowCountry = (country) => {
+    setShowCountry(country)
+  }
+
+  const filteredCountries = () => {
+    if (showCountry === '') {
+      return countries.filter((country) => country.name.toLowerCase()
                                         .includes(searchCountry.toLowerCase()))
+    }
+    else {
+      return [showCountry]
+    }
   }
 
   return (
     <div>
       <Searchfield searchCountry={searchCountry} handleSearchChange={handleSearchChange} />
-      <Display countries={filteredCountries()} />
+      <Display countries={filteredCountries()} handleShowCountry={handleShowCountry} />
     </div>
   )
 }
