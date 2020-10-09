@@ -34,7 +34,6 @@ const App = () => {
       return [showCountry]
     }
   }
-
   return (
     <div>
       <Searchfield searchCountry={searchCountry} handleSearchChange={handleSearchChange} />
