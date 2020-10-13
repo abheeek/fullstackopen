@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import personService from './services/persons'
 import Form from './components/Form'
 import Phonebook from './components/Phonebook'
 import Search from './components/Search'
+import Notification from './components/Notification'
 
 const App = () => {
   const [ persons, setPersons ] = useState([]) 
   const [ newName, setNewName ] = useState('')
   const [ newNumber, setNewNumber ] = useState('')
   const [ searchName, setSearchName ] = useState('')
+  const [ message, setMessage ] = useState('')
+  const [ messageType, setMessageType ] = useState('')
 
   useEffect(() => {
-    console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log(response)
-        setPersons(response.data)
+    personService.getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons)
       })
   }, [])
 
@@ -34,17 +34,46 @@ const App = () => {
 
   const addNewPerson = (event) => {
     event.preventDefault()
-    let names = persons.map((person) => person.name)
+    let index = persons.findIndex(person => person.name === newName)
 
-    if (names.includes(newName)) {
-      alert(`${newName} is already added to phonebook`)
+    if (index > -1) {
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        personService
+          .update(persons[index], newNumber)
+          .then(returnedPerson => {
+            let newPersons = [...persons]
+            newPersons[index] = {...returnedPerson}
+            setPersons(newPersons)
+            setMessage(`Updated ${newName}`)
+            setMessageType('green')
+            setTimeout(() =>{
+              setMessage(null)
+            }, 3000)
+          })
+          .catch(err =>{
+            setMessage(`Information of ${newName} has already been removed from server`)
+            setMessageType('red')
+            setTimeout(() =>{
+              setMessage(null)
+            }, 3000)
+          })
+      }
     }
     else {
       const newPerson = {
         name: newName,
         number: newNumber,
       }
-      setPersons(persons.concat(newPerson))
+      personService
+        .create(newPerson)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson))
+          setMessage(`Added ${newName}`)
+          setMessageType('green')
+          setTimeout(() =>{
+              setMessage(null)
+          }, 3000)
+        })
     }
     setNewName('')
     setNewNumber('')
@@ -55,9 +84,28 @@ const App = () => {
                       person.name.toLowerCase().includes(searchName.toLowerCase()))
   }
 
+  const removeItem = (array, item) => {
+    let index = array.indexOf(item)
+    if (index > -1){
+      array.splice(index, 1)
+    }
+    return array
+  } 
+
+  const handleDeleteClick = person => {
+    if (window.confirm(`Delete ${person.name}?`)){
+      personService
+        .remove(person)
+        .then(() => {
+          setPersons(removeItem([...persons], person))
+        })
+    }
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} messageType={messageType} />
       <Search searchName={searchName} handleSearchChange={handleSearchChange} />
       <h2>add a new</h2>
       <Form 
@@ -65,7 +113,7 @@ const App = () => {
         newName={newName} handleNameChange={handleNameChange} 
         newNumber={newNumber} handleNumberChange={handleNumberChange} />
       <h2>Numbers</h2>
-      <Phonebook persons={filteredPersons()} />
+      <Phonebook persons={filteredPersons()} handleDeleteClick={handleDeleteClick} />
     </div>
   )
 }
